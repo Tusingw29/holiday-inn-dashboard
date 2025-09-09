@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Holiday Inn Dashboard — Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+  <style>
+    html, body, #root { height: 100%; }
+    body { background: #0a0a0a; color: #fff; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="env,react">
+    const { useState, useMemo } = React;
+    const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
+
+    function MetricCard({ label, value, caption, tone }) {
+      const colors = {
+        good: "border-emerald-500/40 bg-emerald-500/10",
+        bad: "border-rose-500/40 bg-rose-500/10",
+        warn: "border-amber-400/40 bg-amber-400/10",
+      };
+      return (
+        <div className={\`rounded-2xl p-5 border \${colors[tone] || "border-neutral-800 bg-neutral-900/60"}\`}>
+          <div className="text-sm text-neutral-400">{label}</div>
+          <div className="text-3xl font-bold mt-1">{value}</div>
+          {caption && <div className="text-xs text-neutral-400 mt-1">{caption}</div>}
+        </div>
+      );
+    }
+
+    function ProblemsList() {
+      const problems = [
+        { title: "Bathroom Cleanliness", score: 24, severity: "high", notes: ["Ant infestations", "Hair in showers", "Clogged sinks"] },
+        { title: "Service Quality", score: 18, severity: "high", notes: ["Teresa complaints", "20+ min waits", "No follow-up"] },
+        { title: "Breakfast Service", score: 14, severity: "medium", notes: ["Out of eggs", "Rude staff", "Empty machines"] },
+        { title: "General Cleanliness", score: 10, severity: "medium", notes: ["Dirty linen", "Room odors", "Poor housekeeping"] },
+        { title: "Equipment", score: 8, severity: "medium", notes: ["Broken fridges", "Elevator issues"] },
+        { title: "Odors", score: 8, severity: "medium", notes: ["Carpet smells", "Poor ventilation"] },
+        { title: "Admin Issues", score: 8, severity: "medium", notes: ["Overbooking", "Price errors"] },
+        { title: "WiFi", score: 4, severity: "low", notes: ["Slow speeds"] },
+        { title: "HVAC", score: 4, severity: "low", notes: ["Cold hallways"] },
+        { title: "Safety", score: 2, severity: "low", notes: ["Pest control"] },
+      ];
+      return (
+        <div className="space-y-3">
+          {problems.map((p, i) => (
+            <div
+              key={i}
+              className={\`rounded-xl bg-neutral-900/70 border border-neutral-800 p-5 border-l-4 \${p.severity === "high" ? "border-l-rose-500" : p.severity === "medium" ? "border-l-amber-400" : "border-l-sky-400"}\`}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <div className="text-lg font-semibold">{i + 1}. {p.title}</div>
+                <div className="px-3 py-1 rounded-full text-xs font-bold bg-neutral-800">Impact: {p.score}</div>
+              </div>
+              <ul className="text-neutral-300 text-sm">
+                {p.notes.map((n, j) => (
+                  <li key={j}>• {n}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function SolutionCard({ title, budget, gain, revenue, payback, items, recommended }) {
+      return (
+        <div className={\`rounded-3xl border p-5 \${recommended ? "border-cyan-400/40 bg-cyan-400/10" : "border-neutral-800 bg-neutral-900/70"}\`}>
+          <div className="flex justify-between items-center mb-3">
+            <div className="text-xl font-semibold">{title}</div>
+            <div className="px-4 py-2 rounded-full bg-blue-600 text-black font-bold">
+              ${budget.toLocaleString()}
+            </div>
+          </div>
+          <ul className="text-neutral-200 space-y-1 mb-4">
+            {items.map((item, i) => <li key={i}>• {item}</li>)}
+          </ul>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-xl bg-neutral-950 border border-neutral-800 p-3 text-center">
+              <div className="text-xs text-neutral-400">Occupancy</div>
+              <div className="text-lg font-bold">{gain}</div>
+            </div>
+            <div className="rounded-xl bg-neutral-950 border border-neutral-800 p-3 text-center">
+              <div className="text-xs text-neutral-400">Revenue</div>
+              <div className="text-lg font-bold">{revenue}</div>
+            </div>
+            <div className="rounded-xl bg-neutral-950 border border-neutral-800 p-3 text-center">
+              <div className="text-xs text-neutral-400">Payback</div>
+              <div className="text-lg font-bold">{payback}</div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function SolutionsList() {
+      return (
+        <div className="space-y-6">
+          <SolutionCard
+            title="Option A: Start Small"
+            budget={42500}
+            gain="+4%"
+            revenue="+$13,500/mo"
+            payback="3.1 months"
+            items={["Emergency pest control", "Staff retraining", "Basic WiFi upgrade", "Deep cleaning"]}
+          />
+          <SolutionCard
+            title="Option B: Smart Middle (RECOMMENDED)"
+            budget={175000}
+            gain="+12%"
+            revenue="+$40,500/mo"
+            payback="4.3 months"
+            items={["Bathroom renovation (8 rooms)", "Staff training systems", "Breakfast renovation", "Enterprise WiFi"]}
+            recommended
+          />
+          <SolutionCard
+            title="Option C: Go Big"
+            budget={750000}
+            gain="+25%"
+            revenue="+$84,000/mo"
+            payback="8.9 months"
+            items={["All 92 bathroom renovations", "Full furniture replacement", "HVAC upgrade", "Lobby renovation"]}
+          />
+        </div>
+      );
+    }
+
+    function MoneySection() {
+      return (
+        <div className="space-y-6">
+          <div className="rounded-3xl bg-neutral-900/70 border border-neutral-800 p-5">
+            <div className="text-lg font-semibold mb-4">Financial Analysis</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="rounded-xl bg-neutral-950 border border-neutral-800 p-4">
+                <div className="text-sm text-neutral-400">Current Monthly</div>
+                <div className="text-2xl font-bold">$195,833</div>
+              </div>
+              <div className="rounded-xl bg-neutral-950 border border-neutral-800 p-4">
+                <div className="text-sm text-neutral-400">Potential Monthly</div>
+                <div className="text-2xl font-bold text-cyan-400">$310,500</div>
+              </div>
+              <div className="rounded-xl bg-neutral-950 border border-neutral-800 p-4">
+                <div className="text-sm text-neutral-400">Annual Opportunity</div>
+                <div className="text-2xl font-bold text-amber-400">+$486,000</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-neutral-900/70 border border-neutral-800 p-5">
+            <div className="text-lg font-semibold mb-3">Option B ROI</div>
+            <div className="space-y-2">
+              <div className="flex justify-between py-2 border-b border-neutral-800">
+                <span>Investment</span><span className="font-bold">$175,000</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-neutral-800">
+                <span>Monthly Gain</span><span className="font-bold text-green-400">+$40,500</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-neutral-800">
+                <span>Payback</span><span className="font-bold">4.3 months</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span>3-Year ROI</span><span className="font-bold text-amber-400">177%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function TimelineSection() {
+      const phases = [
+        { period: "Days 1-10", title: "Emergency Response", items: ["Deploy pest control", "Staff meeting", "Fix Room 221 fridge", "Backup breakfast"] },
+        { period: "Days 11-30", title: "Critical Fixes", items: ["Complete pest treatment", "Retrain front desk", "Deep clean bathrooms", "Replace equipment"] },
+        { period: "Days 31-60", title: "Core Improvements", items: ["Begin renovations", "Install WiFi", "Implement QC", "Upgrade protocols"] },
+        { period: "Days 61-90", title: "Optimization", items: ["Complete renovations", "Staff reviews", "Launch marketing", "IHG inspection"] },
+      ];
+      return (
+        <div className="space-y-4">
+          {phases.map((phase, i) => (
+            <div key={i} className="rounded-2xl bg-neutral-900/70 border border-neutral-800 p-5">
+              <div className="text-sm font-bold text-cyan-400">{phase.period}</div>
+              <div className="text-lg font-semibold mt-1">{phase.title}</div>
+              <ul className="mt-2 text-neutral-200">
+                {phase.items.map((item, j) => <li key={j}>• {item}</li>)}
+              </ul>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function HolidayInnDashboard() {
+      const [tab, setTab] = useState("Overview");
+      const [q, setQ] = useState("");
+      const [severityFilter, setSeverityFilter] = useState("All");
+      const [typeFilter, setTypeFilter] = useState("All");
+
+      const initialRecords = [
+        { site: "google", date: "2024-08-15", snippet: "Hundreds of ants on bathroom counter, absolutely disgusting", type: "bathroom", severity: "H", stars: 1 },
+        { site: "tripadvisor", date: "2024-09-22", snippet: "Shower had black hair from previous guests, not cleaned", type: "bathroom", severity: "H", stars: 2 },
+        { site: "booking", date: "2024-11-05", snippet: "Bathroom sink clogged entire stay, reported but never fixed", type: "bathroom", severity: "H", stars: 2 },
+        { site: "google", date: "2024-06-10", snippet: "Bugs crawling out of bathroom wall", type: "safety", severity: "M", stars: 1 },
+        { site: "google", date: "2024-10-12", snippet: "No eggs at 8:20 AM, staff said 'if it's gone, it's gone'", type: "breakfast", severity: "M", stars: 2 },
+        { site: "tripadvisor", date: "2024-07-18", snippet: "Breakfast worker rude, begrudgingly refilled pancake machine", type: "breakfast", severity: "M", stars: 3 },
+        { site: "expedia", date: "2024-09-30", snippet: "Pancake machine always empty, limited fruit options", type: "breakfast", severity: "M", stars: 3 },
+        { site: "google", date: "2024-12-01", snippet: "Horrible service by front desk clerk Teresa", type: "service", severity: "H", stars: 1 },
+        { site: "booking", date: "2024-08-25", snippet: "Waited 20 minutes to check in, only one person at desk", type: "service", severity: "M", stars: 2 },
+        { site: "tripadvisor", date: "2024-11-15", snippet: "Staff attitude problems, management never followed up", type: "service", severity: "H", stars: 2 },
+        { site: "google", date: "2024-07-05", snippet: "Dirty linen left in room from previous guest", type: "dirty", severity: "M", stars: 2 },
+        { site: "expedia", date: "2024-10-20", snippet: "Room had a smell, carpet just cleaned but still bad", type: "smell", severity: "M", stars: 3 },
+        { site: "google", date: "2024-09-15", snippet: "Room 221 refrigerator not working at all", type: "broken", severity: "M", stars: 3 },
+        { site: "tripadvisor", date: "2024-08-08", snippet: "Elevator call buttons not working properly", type: "broken", severity: "M", stars: 3 },
+        { site: "booking", date: "2024-06-25", snippet: "Coffee pot missing and room had smell", type: "smell", severity: "M", stars: 2 },
+        { site: "google", date: "2024-11-28", snippet: "Overbooked, no king room available despite reservation", type: "other", severity: "H", stars: 1 },
+        { site: "expedia", date: "2024-10-10", snippet: "No parking available after 10 PM", type: "other", severity: "M", stars: 3 },
+        { site: "google", date: "2024-07-20", snippet: "Internet very slow for business travelers", type: "wifi", severity: "M", stars: 3 },
+        { site: "tripadvisor", date: "2024-08-30", snippet: "Hallway very cold, maintenance was notified", type: "ac", severity: "M", stars: 3 },
+        { site: "booking", date: "2024-09-18", snippet: "Final price didn't match Booking.com at checkout", type: "other", severity: "M", stars: 2 },
+      ];
+      const [records] = useState(initialRecords);
+
+      const complaints = useMemo(() => {
+        const counts = {};
+        records.forEach((r) => {
+          const key =
+            r.type === "bathroom" ? "Bathrooms" :
+            r.type === "service" ? "Service" :
+            r.type === "breakfast" ? "Breakfast" :
+            r.type === "dirty" ? "Dirty Rooms" :
+            r.type === "broken" ? "Broken Items" :
+            r.type === "smell" ? "Bad Smells" :
+            r.type === "wifi" ? "WiFi/Internet" :
+            r.type === "ac" ? "AC/Heat" :
+            r.type === "safety" ? "Safety" : "Other Issues";
+          counts[key] = (counts[key] || 0) + 1;
+        });
+        return Object.entries(counts)
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count);
+      }, [records]);
+
+      const filteredRecords = records.filter((r) => {
+        if (severityFilter !== "All" && r.severity !== severityFilter) return false;
+        if (typeFilter !== "All" && r.type !== typeFilter) return false;
+        if (q && !\`\${r.snippet} \${r.site} \${r.type}\`.toLowerCase().includes(q.toLowerCase())) return false;
+        return true;
+      });
+
+      const TABS = ["Overview", "Report", "Problems", "Solutions", "Money", "Timeline"];
+
+      return (
+        <div className="min-h-screen w-full bg-neutral-950 text-white">
+          <header className="max-w-7xl mx-auto px-6 pt-10 pb-6 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold">Holiday Inn Express Rock Hill</h1>
+            <p className="text-neutral-300 text-lg">Complaint Analysis & Improvement Strategy</p>
+            <div className="mt-2 text-sm text-neutral-400">680 Tinsley Way, Rock Hill, SC | 92 Rooms</div>
+          </header>
+
+          <nav className="max-w-7xl mx-auto px-6">
+            <div className="flex flex-wrap gap-2 bg-neutral-900/70 border border-neutral-800 rounded-2xl p-2">
+              {TABS.map((label) => (
+                <button
+                  key={label}
+                  onClick={() => setTab(label)}
+                  className={\`px-4 py-2 rounded-xl text-sm font-semibold \${tab === label ? "bg-gradient-to-r from-cyan-500 to-pink-500 text-black" : "text-neutral-200 hover:bg-neutral-700"}\`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </nav>
+
+          <main className="max-w-7xl mx-auto px-6 pb-24 mt-6">
+            {tab === "Overview" && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <MetricCard label="TripAdvisor" value="3.0/5" caption="Bottom quartile" tone="bad" />
+                  <MetricCard label="Occupancy" value="71.5%" caption="12% below target" tone="warn" />
+                  <MetricCard label="Monthly Loss" value="$44,000" caption="Revenue gap" tone="bad" />
+                  <MetricCard label="Potential" value="+$486K" caption="Annual with fixes" tone="good" />
+                </div>
+
+                <div className="rounded-3xl bg-neutral-900/70 border border-neutral-800 p-6">
+                  <div className="text-lg font-semibold mb-4">Complaint Distribution</div>
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={complaints}>
+                        <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
+                        <XAxis dataKey="name" tick={{ fill: "#9ca3af", fontSize: 11 }} angle={-20} height={60} />
+                        <YAxis tick={{ fill: "#9ca3af", fontSize: 12 }} />
+                        <Tooltip contentStyle={{ background: "#111827", border: "1px solid #1f2937" }} />
+                        <Bar dataKey="count" radius={[8, 8, 0, 0]} fill="#FFC301" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div className="rounded-3xl bg-rose-500/10 border border-rose-500/40 p-5">
+                  <div className="text-lg font-semibold text-rose-400">⚠️ Critical Issues</div>
+                  <ul className="mt-3 space-y-2 text-neutral-200">
+                    <li>• <b>Ant infestation</b> - "Hundreds of ants on counter"</li>
+                    <li>• <b>Service failures</b> - Front desk clerk Teresa named</li>
+                    <li>• <b>Breakfast breakdown</b> - Running out of food by 8:20 AM</li>
+                    <li>• <b>Overbooking</b> - Confirmed reservations not honored</li>
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {tab === "Report" && (
+              <div className="space-y-4">
+                <div className="rounded-2xl bg-neutral-900/70 border border-neutral-800 p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <input
+                      value={q}
+                      onChange={(e) => setQ(e.target.value)}
+                      placeholder="Search..."
+                      className="bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2"
+                    />
+                    <select
+                      value={severityFilter}
+                      onChange={(e) => setSeverityFilter(e.target.value)}
+                      className="bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2"
+                    >
+                      <option>All</option>
+                      <option>H</option>
+                      <option>M</option>
+                      <option>L</option>
+                    </select>
+                    <select
+                      value={typeFilter}
+                      onChange={(e) => setTypeFilter(e.target.value)}
+                      className="bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2"
+                    >
+                      <option>All</option>
+                      <option>bathroom</option>
+                      <option>service</option>
+                      <option>breakfast</option>
+                      <option>dirty</option>
+                      <option>smell</option>
+                      <option>broken</option>
+                      <option>other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-neutral-900/70 border border-neutral-800 p-5 overflow-auto">
+                  <table className="min-w-full text-sm">
+                    <thead className="bg-neutral-800/60">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Date</th>
+                        <th className="px-3 py-2 text-left">Platform</th>
+                        <th className="px-3 py-2 text-left">Type</th>
+                        <th className="px-3 py-2 text-left">Severity</th>
+                        <th className="px-3 py-2 text-left">Stars</th>
+                        <th className="px-3 py-2 text-left">Complaint</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredRecords.map((r, i) => (
+                        <tr key={i} className="border-t border-neutral-800">
+                          <td className="px-3 py-2">{r.date}</td>
+                          <td className="px-3 py-2">{r.site}</td>
+                          <td className="px-3 py-2">{r.type}</td>
+                          <td className="px-3 py-2">
+                            <span
+                              className={\`px-2 py-1 rounded text-xs font-bold \${r.severity === "H" ? "bg-rose-500/20 text-rose-400" : r.severity === "M" ? "bg-amber-400/20 text-amber-400" : "bg-sky-400/20 text-sky-400"}\`}
+                            >
+                              {r.severity}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2">{r.stars}⭐</td>
+                          <td className="px-3 py-2">{r.snippet}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {tab === "Problems" && <ProblemsList />}
+            {tab === "Solutions" && <SolutionsList />}
+            {tab === "Money" && <MoneySection />}
+            {tab === "Timeline" && <TimelineSection />}
+          </main>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<HolidayInnDashboard />);
+  </script>
+</body>
+</html>
